@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  check-froz-api:
+    container_name: check-froz-api
+    image: check-froz-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - check-froz-postgresql
+      - pgadmin
+
+  check-froz-postgresql:
+    container_name: check-froz-postgresql
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    networks:
+      - postgres-network
+    volumes:
+      - ./db-data/:/var/lib/postgresql/data/
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    user: root
+    ports:
+      - "5433:80"
+    env_file:
+      - .env
+    depends_on:
+      - check-froz-postgresql
+    networks:
+      - postgres-network
+    volumes:
+      - ./pgadmin-data/:/var/lib/pgadmin/
+
+networks:
+  postgres-network:
+    driver: bridge
