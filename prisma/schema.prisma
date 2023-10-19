@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CommentedData {
+  id        Int @id @default(autoincrement())
+  data      String
+  comment   String?
+
+  entity    Entity? @relation(fields: [entityId], references: [registreId])
+  legal     Legal? @relation(fields: [legalId], references: [entityId])
+  vessel    Vessel? @relation(fields: [vesselId], references: [entityId])
+  entityId  Int?
+  legalId   Int?
+  vesselId  Int?
+}
+
+model Date {
+  id        Int @id @default(autoincrement())
+  day       Int
+  month     Int
+  year      Int
+  comment   String
+  natural   Natural? @relation(fields: [naturalId], references: [entityId], onDelete: Cascade)
+  naturalId  Int?
+}
+
+model Location {
+  id      Int @id @default(autoincrement())
+  place   String
+  country String
+
+  natural Natural? @relation(fields: [naturalId], references: [entityId])
+  naturalId Int?
+  legal Legal? @relation(fields: [legalId], references: [entityId])
+  legalId Int?
+}
+
+model IdentityDocument {
+  id  Int @id @default(autoincrement())
+  number String
+  comment String
+  isPassport Boolean
+
+  natural Natural? @relation(fields: [naturalId], references: [entityId])
+  naturalId Int?
+}
+
+model Natural {
+  entity      Entity @relation(fields: [entityId], references: [registreId], onDelete: Cascade)
+  entityId    Int @unique
+  firstName   String?
+  sex         Boolean?
+  birthDate   Date[]
+  nationality Country[]
+  title       String?
+  address     Location[]
+  identityDocuments IdentityDocument[]
+}
+
+model Legal {
+  entity  Entity @relation(fields: [entityId], references: [registreId])
+  entityId Int @unique
+  identification  CommentedData[]
+  address Location[]
+  phones String?
+  web String?
+  mail String?
+}
+
+model Vessel {
+  entity        Entity @relation(fields: [entityId], references: [registreId])
+  entityId      Int @unique
+  OMINumber     Int?
+  idenfication  CommentedData[]
+
+}
+
+model Entity {
+  registreId      Int @id @unique
+  name            String
+  nature          Nature
+  alias           CommentedData[]
+  EUReference     String?
+  UNReference     String?
+  juridicalBasis  String[]
+  motifs          String?
+
+  natural         Natural?
+  legal           Legal?
+  vessel          Vessel?
+}
+
+enum Nature {
+  NATURAL
+  LEGAL
+  VESSEL
+}
+
+enum Country {
+  FRANCE
+  RUSSIE
+  UKRAINE
+}
