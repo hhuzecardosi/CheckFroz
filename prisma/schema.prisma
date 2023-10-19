@@ -110,3 +110,8 @@ enum Country {
   RUSSIE
   UKRAINE
 }
+
+model PublicationDate {
+  id  Int @unique @id @default(1)
+  publicationDate DateTime
+}
