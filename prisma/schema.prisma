@@ -10,20 +10,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model CommentedData {
+model Alias {
   id        Int @id @default(autoincrement())
   data      String
   comment   String?
-
   entity    Entity? @relation(fields: [entityId], references: [registreId])
+  entityId  Int?
+}
+
+
+model Identification {
+  id        Int @id @default(autoincrement())
+  data      String
+  comment   String?
   legal     Legal? @relation(fields: [legalId], references: [entityId])
   vessel    Vessel? @relation(fields: [vesselId], references: [entityId])
-  entityId  Int?
   legalId   Int?
   vesselId  Int?
 }
 
-model Date {
+model BirthDate {
   id        Int @id @default(autoincrement())
   day       Int
   month     Int
@@ -33,7 +39,7 @@ model Date {
   naturalId  Int?
 }
 
-model Location {
+model Address {
   id      Int @id @default(autoincrement())
   place   String
   country String
@@ -42,6 +48,14 @@ model Location {
   naturalId Int?
   legal Legal? @relation(fields: [legalId], references: [entityId])
   legalId Int?
+}
+
+model BirthPlace {
+  id      Int @id @default(autoincrement())
+  place   String
+  country String
+  natural Natural? @relation(fields: [naturalId], references: [entityId])
+  naturalId Int?
 }
 
 model IdentityDocument {
@@ -59,18 +73,19 @@ model Natural {
   entityId    Int @unique
   firstName   String?
   sex         Boolean?
-  birthDate   Date[]
+  birthDate   BirthDate[]
+  birthPlace  BirthPlace[]
   nationality Country[]
   title       String?
-  address     Location[]
+  address     Address[]
   identityDocuments IdentityDocument[]
 }
 
 model Legal {
   entity  Entity @relation(fields: [entityId], references: [registreId])
   entityId Int @unique
-  identification  CommentedData[]
-  address Location[]
+  identification  Identification[]
+  address Address[]
   phones String?
   web String?
   mail String?
@@ -80,7 +95,7 @@ model Vessel {
   entity        Entity @relation(fields: [entityId], references: [registreId])
   entityId      Int @unique
   OMINumber     Int?
-  idenfication  CommentedData[]
+  idenfication  Identification[]
 
 }
 
@@ -88,7 +103,7 @@ model Entity {
   registreId      Int @id @unique
   name            String
   nature          Nature
-  alias           CommentedData[]
+  alias           Alias[]
   EUReference     String?
   UNReference     String?
   juridicalBasis  String[]
