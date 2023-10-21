@@ -1,5 +1,4 @@
 import {Elysia} from "elysia";
-import {usersRoutes} from "./src/users/users.controller.ts";
 import swagger from "@elysiajs/swagger";
 
 declare module "bun" {
@@ -25,7 +24,6 @@ app.use(swagger({
   }
 }));
 
-app.use(usersRoutes);
 
 app.listen(Bun.env.PORT, () => {
   console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
