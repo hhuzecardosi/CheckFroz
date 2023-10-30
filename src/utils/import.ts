@@ -17,9 +17,15 @@ type Details = Detail[]
 type Detail = { TypeChamp: string, Valeur: any[] }
 
 
-function jsonToObject(json: Map<string, Object | string>) {
+export type MappedObject = {
+  entity: Entity, alias: Alias[], natural?: Natural, legal?: Legal, vessel?: Vessel, birthDates?: BirthDate[],
+  addresses?: Address[], identityDocuments?: IdentityDocument[], identifications?: Identification[], birthPlaces?: BirthPlace[]
+}
+
+
+export function jsonToObject(json: Map<string, Object | string>): MappedObject {
   const entity: Entity = {
-    registreId: parseInt(_.get(json, 'Registre', '0')),
+    registreId: parseInt(_.get(json, 'IdRegistre', '0')),
     name: _.get(json, 'Nom', ''),
     nature: computeNature(_.get(json, 'Nature', '')),
     EUReference: getUniqueString(findInDetail(_.get(json, 'RegistreDetail', []), 'REFERENCE_UE'), 'ReferenceUe'),
@@ -36,17 +42,19 @@ function jsonToObject(json: Map<string, Object | string>) {
       firstName: getUniqueString(findInDetail(_.get(json, 'RegistreDetail', []), 'PRENOM'), 'Prenom', ''),
       sex: getBooleanSex(findInDetail(_.get(json, 'RegistreDetail', []), 'SEXE')),
       nationality: getArrayString(findInDetail(_.get(json, 'RegistreDetail', []), 'NATIONALITE'), 'Pays'),
-      title: getUniqueString(findInDetail(_.get(json, 'RegistreDetail', []), 'PRENOM'), 'Titre', ', '),
+      title: getUniqueString(findInDetail(_.get(json, 'RegistreDetail', []), 'TITRE'), 'Titre', '; '),
     }
 
     const birthDates: BirthDate[] = getBirthDates(findInDetail(_.get(json, 'RegistreDetail', []), 'DATE_DE_NAISSANCE'), natural.entityId);
     const birthPlaces: BirthPlace[] = getBirthPlaces(findInDetail(_.get(json, 'RegistreDetail', []), 'LIEU_DE_NAISSANCE'), natural.entityId);
     const addresses: Address[] = getAddresses(findInDetail(_.get(json, 'RegistreDetail', []), 'ADRESSE_PP'), natural.entityId, Nature.NATURAL);
     const otherIdentities: IdentityDocument[] = getIdentityDocuments(findInDetail(_.get(json, 'RegistreDetail', []), 'AUTRE_IDENTITE'), natural.entityId, false, 'NumeroCarte');
-    const passports: IdentityDocument[] = getIdentityDocuments(findInDetail(_.get(json, 'RegistreDetail', []), 'AUTRE_IDENTITE'), natural.entityId, true, 'NumeroPassport');
+    const passports: IdentityDocument[] = getIdentityDocuments(findInDetail(_.get(json, 'RegistreDetail', []), 'PASSPORT'), natural.entityId, true, 'NumeroPassport');
     const identityDocuments: IdentityDocument[] = passports.concat(otherIdentities);
 
-    // push objects in database
+    // push objects in database or return it
+
+    return {entity, alias, natural, birthDates, birthPlaces, addresses, identityDocuments};
   }
 
   if (entity.nature === Nature.LEGAL) {
@@ -61,6 +69,7 @@ function jsonToObject(json: Map<string, Object | string>) {
     const addresses: Address[] = getAddresses(findInDetail(_.get(json, 'RegistreDetail', []), 'ADRESSE_PM'), legal.entityId, Nature.LEGAL);
 
     // push objects in database
+    return {entity, alias, identifications, addresses};
   }
 
   if (entity.nature === Nature.VESSEL) {
@@ -72,9 +81,10 @@ function jsonToObject(json: Map<string, Object | string>) {
     const identifications: Identification[] = getIdentifications(findInDetail(_.get(json, 'RegistreDetail', []), 'IDENTIFICATION'), vessel.entityId, Nature.VESSEL);
 
     // push objects in database
-
+    return {entity, alias, identifications};
   }
-  console.log(entity)
+
+  return {entity, alias};
 }
 
 function findInDetail(details: Details, field: string) {
@@ -101,36 +111,37 @@ function getOMINumber(detail: Detail): number | null {
 }
 
 function getBooleanSex(detail: Detail) {
-  if (detail.Valeur.length === 0 || _.get(detail, 'Value.0.Sexe', '') === '')
+  const sex = detail?.Valeur?.map((val) => _.get(val, 'Sexe', '')).join('')
+  if (detail.Valeur.length === 0 || sex === '')
     return null;
-  return _.get(detail, 'Value.0.Sexe', '').toString() === 'Masculin';
+  return sex === 'Masculin';
 }
 
 function getAlias(detail: Detail, entityId: number): Alias[] {
-  return detail?.Valeur.map((val: { Alias: string, Commentaire: string }) => {
-    return {id: 0, data: val?.Alias.trim(), comment: val?.Commentaire.trim(), entityId: entityId};
+  return detail?.Valeur.map((val: { Alias: string, Commentaire: string }, index: number) => {
+    return {id: entityId + '/' + index, data: val?.Alias.trim(), comment: val?.Commentaire.trim(), entityId: entityId};
   });
 }
 
 function getBirthDates(detail: Detail, entityId: number): BirthDate[] {
-  return detail?.Valeur?.map((val: { Jour: string, Mois: string, Annee: string, Commentaire: string }) => {
+  return detail?.Valeur?.map((val: { Jour: string, Mois: string, Annee: string, Commentaire: string }, index: number) => {
     return {
-      id: 0, day: parseInt(val?.Jour?.trim()), month: parseInt(val?.Mois?.trim()), year: parseInt(val?.Annee?.trim()),
-      comment: val?.Commentaire?.trim(), naturalId: entityId
+      id: entityId + '/' + index, day: parseInt(val?.Jour?.trim()), month: parseInt(val?.Mois?.trim()),
+      year: parseInt(val?.Annee?.trim()), comment: val?.Commentaire?.trim(), naturalId: entityId
     };
   });
 }
 
 function getBirthPlaces(detail: Detail, entityId: number): BirthPlace[] {
-  return detail?.Valeur?.map((val: { Lieu: string, Pays: string }) => {
-    return {id: 0, place: val?.Lieu.trim(), country: val?.Pays.trim(), naturalId: entityId};
+  return detail?.Valeur?.map((val: { Lieu: string, Pays: string }, index: number) => {
+    return {id: entityId + '/' + index, place: val?.Lieu.trim(), country: val?.Pays.trim(), naturalId: entityId};
   })
 }
 
 function getAddresses(detail: Detail, entityId: number, entity: Nature): Address[] {
-  return detail?.Valeur.map((val: { Adresse: string, Pays: string }) => {
+  return detail?.Valeur.map((val: { Adresse: string, Pays: string }, index: number) => {
     return {
-      id: 0, place: val?.Adresse.trim(), country: val?.Pays.trim(),
+      id: entityId + '/' + index, place: val?.Adresse.trim(), country: val?.Pays.trim(),
       naturalId: entity === Nature.NATURAL ? entityId : null,
       legalId: entity === Nature.LEGAL ? entityId : null
     };
@@ -138,18 +149,18 @@ function getAddresses(detail: Detail, entityId: number, entity: Nature): Address
 }
 
 function getIdentityDocuments(detail: Detail, entityId: number, isPassport: boolean, path: string): IdentityDocument[] {
-  return detail?.Valeur.map((val) => {
+  return detail?.Valeur.map((val, index: number) => {
     return {
-      id: 0, number: _.get(val, path, '').trim(),
+      id: entityId + '/' + index, number: _.get(val, path, '').trim(),
       comment: _.get(val, 'Commentaire', '').trim(), isPassport: isPassport, naturalId: entityId
     };
   });
 }
 
 function getIdentifications(detail: Detail, entityId: number, entity: Nature): Identification[] {
-  return detail?.Valeur.map((val) => {
+  return detail?.Valeur.map((val: {Identification: string, Commentaire: string}, index: number) => {
     return {
-      id: 0, data: val?.Identification.trim(), comment: val?.Commentaire.trim(),
+      id: entityId + '/' + index, data: val?.Identification.trim(), comment: val?.Commentaire.trim(),
       vesselId: entity === Nature.VESSEL ? entityId : null,
       legalId: entity === Nature.LEGAL ? entityId : null
     };

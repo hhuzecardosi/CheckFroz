@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Alias {
-  id        Int @id @default(autoincrement())
+  id        String @id
   data      String
   comment   String?
   entity    Entity? @relation(fields: [entityId], references: [registreId])
@@ -20,7 +20,7 @@ model Alias {
 
 
 model Identification {
-  id        Int @id @default(autoincrement())
+  id        String @id
   data      String
   comment   String?
   legal     Legal? @relation(fields: [legalId], references: [entityId])
@@ -30,7 +30,7 @@ model Identification {
 }
 
 model BirthDate {
-  id        Int @id @default(autoincrement())
+  id        String @id
   day       Int
   month     Int
   year      Int
@@ -40,7 +40,7 @@ model BirthDate {
 }
 
 model Address {
-  id      Int @id @default(autoincrement())
+  id      String @id
   place   String
   country String
 
@@ -51,7 +51,7 @@ model Address {
 }
 
 model BirthPlace {
-  id      Int @id @default(autoincrement())
+  id      String @id
   place   String
   country String
   natural Natural? @relation(fields: [naturalId], references: [entityId])
@@ -59,7 +59,7 @@ model BirthPlace {
 }
 
 model IdentityDocument {
-  id  Int @id @default(autoincrement())
+  id  String @id
   number String
   comment String
   isPassport Boolean
