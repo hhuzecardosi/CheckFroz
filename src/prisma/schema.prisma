@@ -31,9 +31,9 @@ model Identification {
 
 model BirthDate {
   id        String @id
-  day       Int
-  month     Int
-  year      Int
+  day       Int?
+  month     Int?
+  year      Int?
   comment   String
   natural   Natural? @relation(fields: [naturalId], references: [entityId], onDelete: Cascade)
   naturalId  Int?

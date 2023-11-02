@@ -9,8 +9,9 @@ import {
   Natural,
   Nature,
   Vessel,
-  Identification
+  Identification,
 } from "@prisma/client";
+
 import _ from "lodash";
 
 type Details = Detail[]
@@ -21,7 +22,6 @@ export type MappedObject = {
   entity: Entity, alias: Alias[], natural?: Natural, legal?: Legal, vessel?: Vessel, birthDates?: BirthDate[],
   addresses?: Address[], identityDocuments?: IdentityDocument[], identifications?: Identification[], birthPlaces?: BirthPlace[]
 }
-
 
 export function jsonToObject(json: Map<string, Object | string>): MappedObject {
   const entity: Entity = {
@@ -69,7 +69,7 @@ export function jsonToObject(json: Map<string, Object | string>): MappedObject {
     const addresses: Address[] = getAddresses(findInDetail(_.get(json, 'RegistreDetail', []), 'ADRESSE_PM'), legal.entityId, Nature.LEGAL);
 
     // push objects in database
-    return {entity, alias, identifications, addresses};
+    return {entity, alias, legal, identifications, addresses};
   }
 
   if (entity.nature === Nature.VESSEL) {
@@ -81,7 +81,7 @@ export function jsonToObject(json: Map<string, Object | string>): MappedObject {
     const identifications: Identification[] = getIdentifications(findInDetail(_.get(json, 'RegistreDetail', []), 'IDENTIFICATION'), vessel.entityId, Nature.VESSEL);
 
     // push objects in database
-    return {entity, alias, identifications};
+    return {entity, alias, vessel, identifications};
   }
 
   return {entity, alias};
@@ -107,7 +107,7 @@ function getJuridicalBasis(detail: Detail) {
 function getOMINumber(detail: Detail): number | null {
   if (detail.Valeur.length === 0)
     return null;
-  return parseInt(_.get(detail, 'Value.0.NumeroOMI', '')) || null
+  return parseInt(_.get(detail, 'Valeur.0.NumeroOMI', '')) || null
 }
 
 function getBooleanSex(detail: Detail) {

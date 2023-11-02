@@ -1,9 +1,13 @@
 import {describe, test} from "bun:test";
 import _ from "lodash";
 import {jsonToObject, MappedObject} from "../src/utils/import.ts";
+import {importGovData} from "../src/services/import.service.ts";
 
 describe('Import Data from Gouv API Orchestration', () => {
   test("Launch all procedure", async () => {
+    await importGovData();
+  });
+  test("Launch all procedure from test file", async () => {
     const path = 'test/assets-test/response-data.json';
     const file = Bun.file(path);
 
