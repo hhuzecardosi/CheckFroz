@@ -1,47 +1,63 @@
 -- CreateEnum
 CREATE TYPE "Nature" AS ENUM ('NATURAL', 'LEGAL', 'VESSEL');
 
--- CreateEnum
-CREATE TYPE "Country" AS ENUM ('FRANCE', 'RUSSIE', 'UKRAINE');
-
 -- CreateTable
-CREATE TABLE "CommentedData" (
-    "id" SERIAL NOT NULL,
+CREATE TABLE "Alias" (
+    "id" TEXT NOT NULL,
     "data" TEXT NOT NULL,
     "comment" TEXT,
     "entityId" INTEGER,
+
+    CONSTRAINT "Alias_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Identification" (
+    "id" TEXT NOT NULL,
+    "data" TEXT NOT NULL,
+    "comment" TEXT,
     "legalId" INTEGER,
     "vesselId" INTEGER,
 
-    CONSTRAINT "CommentedData_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Identification_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Date" (
-    "id" SERIAL NOT NULL,
-    "day" INTEGER NOT NULL,
-    "month" INTEGER NOT NULL,
-    "year" INTEGER NOT NULL,
+CREATE TABLE "BirthDate" (
+    "id" TEXT NOT NULL,
+    "day" INTEGER,
+    "month" INTEGER,
+    "year" INTEGER,
     "comment" TEXT NOT NULL,
     "naturalId" INTEGER,
 
-    CONSTRAINT "Date_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "BirthDate_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Location" (
-    "id" SERIAL NOT NULL,
+CREATE TABLE "Address" (
+    "id" TEXT NOT NULL,
     "place" TEXT NOT NULL,
     "country" TEXT NOT NULL,
     "naturalId" INTEGER,
     "legalId" INTEGER,
 
-    CONSTRAINT "Location_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Address_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BirthPlace" (
+    "id" TEXT NOT NULL,
+    "place" TEXT NOT NULL,
+    "country" TEXT NOT NULL,
+    "naturalId" INTEGER,
+
+    CONSTRAINT "BirthPlace_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "IdentityDocument" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "number" TEXT NOT NULL,
     "comment" TEXT NOT NULL,
     "isPassport" BOOLEAN NOT NULL,
@@ -55,16 +71,16 @@ CREATE TABLE "Natural" (
     "entityId" INTEGER NOT NULL,
     "firstName" TEXT,
     "sex" BOOLEAN,
-    "nationality" "Country"[],
+    "nationality" TEXT[],
     "title" TEXT
 );
 
 -- CreateTable
 CREATE TABLE "Legal" (
     "entityId" INTEGER NOT NULL,
-    "phones" TEXT,
-    "web" TEXT,
-    "mail" TEXT
+    "phones" TEXT[],
+    "web" TEXT[],
+    "mail" TEXT[]
 );
 
 -- CreateTable
@@ -86,6 +102,14 @@ CREATE TABLE "Entity" (
     CONSTRAINT "Entity_pkey" PRIMARY KEY ("registreId")
 );
 
+-- CreateTable
+CREATE TABLE "PublicationDate" (
+    "id" INTEGER NOT NULL DEFAULT 1,
+    "publicationDate" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PublicationDate_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Natural_entityId_key" ON "Natural"("entityId");
 
@@ -98,23 +122,29 @@ CREATE UNIQUE INDEX "Vessel_entityId_key" ON "Vessel"("entityId");
 -- CreateIndex
 CREATE UNIQUE INDEX "Entity_registreId_key" ON "Entity"("registreId");
 
--- AddForeignKey
-ALTER TABLE "CommentedData" ADD CONSTRAINT "CommentedData_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("registreId") ON DELETE SET NULL ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "PublicationDate_id_key" ON "PublicationDate"("id");
 
 -- AddForeignKey
-ALTER TABLE "CommentedData" ADD CONSTRAINT "CommentedData_legalId_fkey" FOREIGN KEY ("legalId") REFERENCES "Legal"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Alias" ADD CONSTRAINT "Alias_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Entity"("registreId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CommentedData" ADD CONSTRAINT "CommentedData_vesselId_fkey" FOREIGN KEY ("vesselId") REFERENCES "Vessel"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Identification" ADD CONSTRAINT "Identification_legalId_fkey" FOREIGN KEY ("legalId") REFERENCES "Legal"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Date" ADD CONSTRAINT "Date_naturalId_fkey" FOREIGN KEY ("naturalId") REFERENCES "Natural"("entityId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Identification" ADD CONSTRAINT "Identification_vesselId_fkey" FOREIGN KEY ("vesselId") REFERENCES "Vessel"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Location" ADD CONSTRAINT "Location_naturalId_fkey" FOREIGN KEY ("naturalId") REFERENCES "Natural"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "BirthDate" ADD CONSTRAINT "BirthDate_naturalId_fkey" FOREIGN KEY ("naturalId") REFERENCES "Natural"("entityId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Location" ADD CONSTRAINT "Location_legalId_fkey" FOREIGN KEY ("legalId") REFERENCES "Legal"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Address" ADD CONSTRAINT "Address_naturalId_fkey" FOREIGN KEY ("naturalId") REFERENCES "Natural"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Address" ADD CONSTRAINT "Address_legalId_fkey" FOREIGN KEY ("legalId") REFERENCES "Legal"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BirthPlace" ADD CONSTRAINT "BirthPlace_naturalId_fkey" FOREIGN KEY ("naturalId") REFERENCES "Natural"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "IdentityDocument" ADD CONSTRAINT "IdentityDocument_naturalId_fkey" FOREIGN KEY ("naturalId") REFERENCES "Natural"("entityId") ON DELETE SET NULL ON UPDATE CASCADE;
