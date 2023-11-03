@@ -2,6 +2,7 @@ import {Elysia} from "elysia";
 import swagger from "@elysiajs/swagger";
 import { cron } from '@elysiajs/cron'
 import {importGovData} from "./src/services/import.service.ts";
+import { rateLimit } from "elysia-rate-limit";
 
 declare module "bun" {
   interface Env {
@@ -28,6 +29,10 @@ app.use(swagger({
 
 // @ts-ignore
 app.use(cron({name: 'import', pattern: '30 12 * * *', run: () => { importGovData().then(); }}));
+// @ts-ignore
+app.use(rateLimit({duration: 60 * 1000, max: 50, responseMessage: 'Too many requests'}));
+
+
 
 app.listen(Bun.env.PORT, () => {
   console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
