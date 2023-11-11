@@ -20,9 +20,5 @@ export async function searchEntity(query: QuerySearchDTO, prisma: PrismaClient):
   const request = {where: {AND: AND}, select: {registreId: true}};
 
   //@ts-ignore
-  const results = await prisma.entity.findMany(request);
-
-  console.log(results);
-
-  return results;
+  return prisma.entity.findMany(request);
 }

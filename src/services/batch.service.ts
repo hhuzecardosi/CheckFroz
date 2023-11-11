@@ -12,5 +12,6 @@ export async function batchService(query: BodyBatchDTO): Promise<{results: any[]
     const formattedData = await formatData(entityResults, prisma);
     results.push({results: formattedData, totalCount: formattedData.length, position:  position ++});
   }
+  prisma.$disconnect();
   return results;
 }

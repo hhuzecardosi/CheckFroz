@@ -4,6 +4,6 @@ import {batch} from "../controller/batch.controller.ts";
 
 
 export const batchRoutes = new Elysia({prefix: '/batch'})
-.post('', async ({body}) => {
+.post('', async ({body, set}) => {
   return batch(body);
 }, {  detail: {tags: ['batch']}, body: bodyBatchDTO})

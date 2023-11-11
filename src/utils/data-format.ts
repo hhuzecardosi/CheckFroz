@@ -4,7 +4,6 @@ import _ from "lodash";
 export async function formatData(registreIds: { registreId: number }[], prisma: PrismaClient) {
   const entities: any[] = [];
   for await (let registreId of registreIds) {
-    console.log(registreId.registreId);
     const entity = await prisma.entity.findUnique({
       where: {registreId: registreId.registreId}, include: {natural: true, legal: true, vessel: true, alias: true}
     });

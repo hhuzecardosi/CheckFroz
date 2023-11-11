@@ -2,26 +2,24 @@ import { PrismaClient } from "@prisma/client";
 import {Elysia} from "elysia";
 import _ from "lodash";
 
-export const isAuthenticated = (app: Elysia) =>
+export const isAuthenticated = new Elysia()
   // @ts-ignore
-  app.derive(async ({headers, accessToken, set}) => {
-    console.log(headers);
+  .derive(async ({headers, accessToken, set}) => {
     const token = _.get(headers, 'authorization', undefined);
     if (!token){
       set.status = 401;
-      return "Unauthorized";
+      throw new Error("Unauthorized");
     }
-    const decoded = await accessToken.verify(token);
-    console.log(decoded);
-    if (!decoded){
+    const decodedToken = await accessToken.verify(token);
+    if (!decodedToken){
       set.status = 401;
-      return "Token expired";
+      throw new Error("Token expired");
     }
     const prisma = new PrismaClient();
-    const user = await prisma.users.findUnique({where: {email: decoded.email}});
+    const user = await prisma.users.findUnique({where: {email: decodedToken.email}});
     if (!user){
       set.status = 401;
-      return "Unauthorized";
+      throw new Error("Unauthorized");
     }
     return user;
   })
