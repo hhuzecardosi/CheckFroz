@@ -26,3 +26,11 @@ export type QuerySearchDTO = {
 export type BodyBatchDTO = { entities: QuerySearchDTO[] };
 
 export const bodyBatchDTO = t.Object({entities: t.Array(querySearchDTO)});
+
+export const bodySignIN = t.Object({
+  email: t.String(),
+  password: t.String(),
+  confirmedPassword: t.String()
+});
+
+export type BodySignIN = {email: string, password: string, confirmedPassword: string};
