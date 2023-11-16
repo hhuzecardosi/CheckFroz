@@ -8,6 +8,8 @@ import {batchRoutes} from "./src/routes/batch.routes.ts";
 import {jwt} from "@elysiajs/jwt";
 import {authRoutes} from "./src/routes/auth.routes.ts";
 import {errorHandling} from "./src/utils/errorHandling.ts";
+import {subscriptionRoutes} from "./src/routes/subscription.routes.ts";
+import {stripeRoutes} from "./src/routes/stripe.routes.ts";
 
 declare module "bun" {
   interface Env {
@@ -19,6 +21,8 @@ declare module "bun" {
     POSTGRES_URL: string;
     JWT_SECRET: string;
     REFRESH_TOKEN_SECRET: string;
+    STRIPE_SECRET_KEY: string;
+    STRIPE_WEBHOOK_SECRET: string;
   }
 }
 
@@ -43,7 +47,15 @@ app.use(swagger({
       {
         name: 'auth',
         description: 'Auth endpoint for CheckFroz. Sign in, sign up, and refreshToken.'
-      }
+      },
+      {
+        name: 'user',
+        description: 'User endpoint for CheckFroz. Subscribe and unsubscribe to CheckFroz.'
+      },
+      {
+        name: 'stripe',
+        description: 'Stripe endpoint for CheckFroz. Handle Stripe webhooks.'
+      },
     ]
   }
 }));
@@ -56,11 +68,13 @@ app.group('/api', (app) =>
     // @ts-ignore
     .use(jwt({name: 'accessToken', secret: Bun.env.JWT_SECRET, exp: '5m'}))
     // @ts-ignore
-    .use(jwt({name: 'refreshToken', secret: Bun.env.REFRESH_TOKEN_SECRET, exp: '7M'}))
+    .use(jwt({name: 'refreshToken', secret: Bun.env.REFRESH_TOKEN_SECRET, exp: '365d'}))
     .use(errorHandling)
     .use(searchRoutes)
     .use(batchRoutes)
     .use(authRoutes)
+    .use(subscriptionRoutes)
+    .use(stripeRoutes)
 );
 // @ts-ignore
 

@@ -126,8 +126,18 @@ model PublicationDate {
 }
 
 model Users {
-  id  Int @unique @id @default(autoincrement())
+  id  String @unique @id @default(uuid())
   email String @unique
   password String
   refreshToken String?
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  idSubscription String @unique @id @default(uuid())
+  user Users @relation(fields: [idUser], references: [id])
+  idUser String
+  active Boolean @default(false)
+  apiKey String @unique @default(uuid())
+  paymentIntent String?
 }

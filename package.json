@@ -24,6 +24,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "postgres": "^3.4.0",
-    "prisma": "latest"
+    "prisma": "latest",
+    "stripe": "^14.4.0"
   }
 }
