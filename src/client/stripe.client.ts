@@ -9,7 +9,7 @@ export async function createPaymentIntent(userId: string, subscriptionId: string
     amount: 1000,
     currency: 'eur',
     payment_method_types: ['card'],
-    metadata: {user_id: userId, subscription_id: subscriptionId}
+    metadata: {userId: userId, subscriptionId: subscriptionId}
   }
   try {
     return await stripe.paymentIntents.create(paymentParams);

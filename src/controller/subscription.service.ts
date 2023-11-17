@@ -68,3 +68,24 @@ export async function activateSubscription(subscriptionId: string) {
 
   return 'Subscribed successfully';
 }
+
+export async function getSubscriptions(userId: string, set: SetType) {
+  const prisma = new PrismaClient();
+
+  const subscriptions = await prisma.subscription.findMany({where: {idUser: userId}});
+
+  await prisma.$disconnect();
+
+  return subscriptions;
+}
+
+export async function checkApiKey(apiKey: string): Promise<boolean> {
+  const prisma = new PrismaClient();
+
+  const subscription = await prisma.subscription.findUnique(
+    {where: {apiKey: apiKey, active: true}});
+
+  await prisma.$disconnect();
+
+  return !!subscription;
+}
