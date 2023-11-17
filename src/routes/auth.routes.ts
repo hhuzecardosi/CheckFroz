@@ -1,6 +1,6 @@
 import {Elysia, t} from "elysia";
 import {bodySignIN, bodySignUP} from "../utils/endpoints.dto.ts";
-import {signIn, signUp, storeRefreshToken} from "../controller/auth.service.ts";
+import {signIn, signUp, storeRefreshToken} from "../services/auth.service.ts";
 
 
 export const authRoutes = new Elysia({prefix: '/auth'})

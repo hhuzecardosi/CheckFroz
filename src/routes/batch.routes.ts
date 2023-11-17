@@ -1,6 +1,6 @@
 import {Elysia} from "elysia";
 import {bodyBatchDTO} from "../utils/endpoints.dto.ts";
-import {batch} from "../controller/batch.controller.ts";
+import {batch} from "../services/batch.service.ts";
 import {apiKeyCheck} from "../utils/apiKeyCheck.ts";
 
 

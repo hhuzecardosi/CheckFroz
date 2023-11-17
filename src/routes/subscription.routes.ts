@@ -2,7 +2,7 @@ import {Elysia, t} from "elysia";
 import _ from "lodash";
 import {isAuthenticated} from "../utils/isAuthenticated.ts";
 
-import {createNewSubscription, deactivateSubscription, getSubscriptions} from "../controller/subscription.service.ts";
+import {createNewSubscription, deactivateSubscription, getSubscriptions} from "../services/subscription.service.ts";
 
 
 export const subscriptionRoutes = new Elysia({prefix: '/user'})

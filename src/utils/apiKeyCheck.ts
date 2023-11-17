@@ -1,5 +1,5 @@
 import {Elysia} from "elysia";
-import {checkApiKey} from "../controller/subscription.service.ts";
+import {checkApiKey} from "../services/subscription.service.ts";
 
 export const apiKeyCheck = new Elysia()
   .derive(async ({headers, set}) => {

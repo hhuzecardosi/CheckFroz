@@ -1,11 +1,9 @@
 import {QuerySearchDTO} from "../utils/endpoints.dto.ts";
 import {PrismaClient} from "@prisma/client";
-import {formatData} from "../utils/data-format.ts";
 import {searchEntity} from "../utils/search-entity.ts";
+import {formatData} from "../utils/data-format.ts";
 
-
-export async function searchService(query: QuerySearchDTO): Promise<{results: any[], totalCount: number}> {
-
+export async function search(query: QuerySearchDTO): Promise<{results: any[], totalCount: number}> {
   const prisma = new PrismaClient();
 
   const results = await searchEntity(query, prisma);
@@ -14,6 +12,4 @@ export async function searchService(query: QuerySearchDTO): Promise<{results: an
   prisma.$disconnect();
 
   return {results: formattedData, totalCount: formattedData.length};
-
-
 }
