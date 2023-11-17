@@ -5,5 +5,5 @@ import _ from "lodash";
 
 export const stripeRoutes = new Elysia({prefix: '/stripe'})
 .post('/webhook', async ({body, request}) => {
-  return await handleWebhookResponse(body, JSON.stringify(request.headers.get('stripe-signature')));
+  return await handleWebhookResponse(body);
 }, {detail: {tags: ['stripe']}});
